@@ -233,7 +233,7 @@ function shuffle(array){
 function prepareQuestions(){
   examQuestions = originalQuestions.map((item, originalIndex) => ({
     ...item, originalIndex,
-    options: item.options.map(({ text, img }, originalOptionIndex) => ({ text, img, originalOptionIndex }))
+    options: shuffle(item.options.map(({ text, img }, originalOptionIndex) => ({ text, img, originalOptionIndex })))
   }));
 }
 
