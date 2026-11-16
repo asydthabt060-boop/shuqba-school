@@ -107,7 +107,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 <section class="card" id="login">
   <h2>الدخول إلى امتحان الجغرافيا</h2>
   <p class="notice">
-    امتحان إلكتروني تجريبي — ١٠ أسئلة بترتيب عشوائي. مدة الامتحان ٢٥ دقيقة. تُحفظ العلامة في سجل الإدارة بعد التسليم.
+    امتحان إلكتروني تجريبي — ١٠ أسئلة بترتيب عشوائي. مدة الامتحان ١٥ دقيقة. تُحفظ العلامة في سجل الإدارة بعد التسليم.
   </p>
 
   <label for="studentName">اسم الطالب</label>
@@ -173,7 +173,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <div class="topbar">
     <span id="studentInfo"></span>
     <span>العلامة: 20</span>
-    <span class="timer">الوقت المتبقي: <span id="timer">25:00</span></span>
+    <span class="timer">الوقت المتبقي: <span id="timer">15:00</span></span>
   </div>
 
   <p class="notice">اختر إجابة واحدة لكل سؤال، ثم اضغط «تسليم الامتحان».</p>
@@ -209,7 +209,7 @@ let currentTeacherResults = [];
 const originalQuestions = [{"q":"ما الأشعة المسؤولة عن تسخين الغلاف الجوي قرب سطح الأرض؟","options":["السينية","جاما","فوق البنفسجية","تحت الحمراء"]},{"q":"في أي مرحلة من مراحل تشكّل الغيوم الركامية تنشط التيارات الهوائية وعملية التكاثف كما ورد في الدرس؟","options":["الرابعة","الثانية","الأولى","الثالثة"]},{"q":"ما الظاهرة الناتجة عن التفريغ الكهربائي بين الشحنات الموجبة والسالبة داخل سحابة أو بين سحابتين؟","options":["البرق","الصاعقة","الجبهة الهوائية","الرعد"]},{"q":"أيّ التيارات البحرية يؤثّر في سواحل شرق أمريكا الشمالية وغرب أوروبا؟","options":["تيار اليابان","تيار كناري","تيار الخليج","تيار البرازيل"]},{"q":"أيّ أنواع السحب يرتبط بهطول الأمطار الغزيرة المصحوبة بالبرق والرعد؟","options":["المزن الركامي","السحاب الركامي العادي","الركام المتوسط","السحب المرتفعة"]},{"q":"ما اسم الرياح الرطبة التي تهبّ نهارًا من البحر إلى اليابسة؟","options":["نسيم الجبل","نسيم البحر","نسيم البر","نسيم الوادي"]},{"q":"إذا كانت الحرارة 35°م في منطقة تقع على عمق 270 مترًا دون مستوى سطح البحر، فكم تبلغ تقريبًا في منطقة ترتفع 30 مترًا فوق مستوى سطح البحر؟","options":["20°م","37°م","33°م","40°م"]},{"q":"ما الرياح التي تهبّ على جنوب شرق آسيا وتسبّب هطول الأمطار صيفًا؟","options":["القطبية","الموسمية الشتوية","الموسمية الصيفية","التجارية"]},{"q":"إذا كان الضغط عند مستوى سطح البحر 1013 مليبار وينخفض نحو 10 مليبار لكل 100 متر، فكم يبلغ عند ارتفاع 500 متر؟","options":["913 مليبار","953 مليبار","963 مليبار","973 مليبار"]},{"q":"ما اتجاه الرياح الغربية العكسية في النصف الشمالي من الكرة الأرضية؟","options":["شمالية غربية","جنوبية غربية","شمالية شرقية","جنوبية شرقية"]}];
 
 let examQuestions = [];
-let remainingSeconds = 1500;
+let remainingSeconds = 900;
 let timerInterval = null;
 let submitted = false;
 let studentName = "";
@@ -230,11 +230,8 @@ function shuffle(array){
 }
 
 function prepareQuestions(){
-  const withIndexes = (items, offset) => items.map((item,index)=>({...item,originalIndex:offset+index}));
-  const partOne = withIndexes(originalQuestions.slice(0,11),0);
-  const partTwo = shuffle(withIndexes(originalQuestions.slice(11,19),11));
-  const partThree = shuffle(withIndexes(originalQuestions.slice(19),19));
-  examQuestions = [...partOne,...partTwo,...partThree].map(item => {
+  const indexed = originalQuestions.map((item, originalIndex) => ({ ...item, originalIndex }));
+  examQuestions = shuffle(indexed).map(item => {
     const options = shuffle(
       item.options.map((text,originalOptionIndex) => ({ text, originalOptionIndex }))
     );
@@ -315,7 +312,7 @@ async function startExam(){
   studentName = studentNameInput;
   branchName = branch;
   submitted = false;
-  remainingSeconds = 1500;
+  remainingSeconds = 900;
 
   prepareQuestions();
   renderQuestions();
@@ -328,7 +325,7 @@ async function startExam(){
   result.hidden = true;
   exam.hidden = false;
 
-  const deadline = Date.now() + 1500 * 1000;
+  const deadline = Date.now() + 900 * 1000;
   timerInterval = setInterval(() => {
     if(submitted) return;
 
