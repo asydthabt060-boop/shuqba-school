@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>امتحان التكنولوجيا | الثاني عشر العلمي</title>
+<style>
+:root{font-family:"Segoe UI",Tahoma,sans-serif;color:#14282d;background:#edf3f2;line-height:1.65;--teal:#0d675a;--edge:#c8dad7}
+*{box-sizing:border-box}body{margin:0}header{background:#103631;color:white;padding:30px 20px 34px}
+.wrap{max-width:920px;margin:auto}header p{margin:0;color:#bad9d1}h1{font-size:clamp(1.55rem,4vw,2.55rem);line-height:1.3;margin:9px 0}
+main{padding:20px 16px 48px}section,aside,details{background:#fff;border:1px solid var(--edge);border-radius:14px;padding:clamp(14px,3vw,26px);margin-bottom:16px}
+h2{margin:0 0 12px;font-size:1.25rem}button,input{font:inherit}button{cursor:pointer;border:1px solid var(--teal);background:var(--teal);color:white;border-radius:8px;padding:8px 17px}button.secondary{background:white;color:var(--teal)}button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:3px solid #b16d10;outline-offset:3px}.fields,.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.fields label{display:grid;gap:4px;flex:1 1 200px}
+input[type=text]{padding:8px;border:1px solid #77918e;border-radius:7px;width:100%}.status{position:sticky;top:0;z-index:1;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:8px}
+time{direction:ltr;font-variant-numeric:tabular-nums;font-size:1.3rem;font-weight:700;color:var(--teal)}time.ending{color:#a13122}fieldset{border:0;padding:0;margin:0;min-width:0}legend{font-weight:700;font-size:1.15rem;margin-bottom:12px}
+.option{display:flex;gap:9px;align-items:baseline;padding:10px;margin:8px 0;border:1px solid var(--edge);border-radius:8px;cursor:pointer;overflow-wrap:anywhere}.option:has(input:checked){background:#e5f4ee;border-color:#387b6e}.option bdi{white-space:pre-wrap}
+pre{direction:ltr;text-align:left;background:#edf3f2;padding:10px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}summary{cursor:pointer;font-weight:700}.table-scroll{overflow:auto;margin-top:10px}
+table{border-collapse:collapse;direction:ltr;text-align:center;width:100%}th,td{border:1px solid var(--edge);padding:5px 8px}th{background:#e5f4ee}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:7px}.grid button{padding:4px;color:#17352f;background:#fff;border-color:var(--edge)}.grid button.done{background:#d8eee5}.grid button[aria-current=true]{border:2px solid var(--teal);font-weight:700}.controls{justify-content:space-between;margin-top:16px}.grade{font-size:2rem;font-weight:750;color:var(--teal)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="wrap"><p>مدرسة ذكور شقبا الثانوية</p><h1>اختبار الشهرين الأول في التكنولوجيا</h1><p>الصف الثاني عشر العلمي</p></div></header>
+<main class="wrap">
+<section id="intro"><h2>بيانات الطالب</h2><p>40 سؤال اختيار من متعدد، لكل سؤال علامة واحدة. مدة الامتحان 50 دقيقة، ويُسلّم تلقائيًا عند انتهاء الوقت.</p>
+<form id="start"><div class="fields"><label>اسم الطالب<input name="student" type="text" required maxlength="100"></label><label>الشعبة<select name="group" required><option value="">اختر الشعبة</option><option>أ</option><option>ب</option></select></label><label>رمز الدخول<input name="access" type="password" inputmode="numeric" required maxlength="8"></label></div><p id="startError" role="alert"></p><p><button>ابدأ الامتحان</button></p></form></section>
+<div id="exam" hidden>
+<aside class="status"><strong id="progress"></strong><time id="timer" aria-label="الوقت المتبقي">50:00</time><button id="submit" type="button">تسليم</button></aside>
+<section><fieldset id="question"></fieldset><div class="row controls"><button type="button" class="secondary" id="prev">السابق</button><button type="button" id="next">التالي</button></div></section>
+<details id="reference" hidden><summary id="tableName"></summary><div class="table-scroll" id="table"></div></details>
+<section aria-label="التنقل بين الأسئلة"><h2>الأسئلة</h2><div class="grid" id="numbers"></div></section>
+</div>
+<section id="result" hidden aria-live="polite"><h2 id="outcome" tabindex="-1"></h2><p id="identity"></p><button id="retry" type="button" hidden>إعادة محاولة التسليم</button><p id="resultDetails"></p></section>
+</main>
+<script>
+const data={"questions":[{"text":"لترتيب بيانات جدول employee_tbl تصاعدياً بناءً على حقل الأجرة بالساعة emp_pay، ما جملة SQL الصحيحة؟","options":[["A","SELECT * FROM employee_tbl SORT emp_pay ASC;"],["B","SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"],["C","SELECT * ORDER BY emp_pay FROM employee_tbl ASC;"],["D","SELECT * FROM emp_pay ORDER BY employee_tbl ASC;"]],"code":""},{"text":"ما معنى النجمة (*) في الجملة الآتية؟","options":[["أ","اختيار الحقل الأول فقط من الجدول"],["ب","ضرب قيم الحقول بعضها ببعض"],["ج","اختيار جميع حقول الجدول"],["د","حذف جميع حقول الجدول"]],"code":"SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"},{"text":"ما جملة SQL التي تعرض بيانات الجدول employee_tbl مرتبة تنازلياً حسب الأجرة بالساعة emp_pay؟","options":[["A","SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"],["B","SELECT * FROM employee_tbl ORDER BY DESC emp_pay;"],["C","SELECT * FROM employee_tbl DESC emp_pay;"],["D","SELECT * FROM employee_tbl ORDER BY emp_pay DESC;"]],"code":""},{"text":"يصلح للحقل (اسم المهندس) النوعان Text وMemo. أيهما يُختار ولماذا؟","options":[["أ","Memo؛ لأنه يتسع لرموز أكثر"],["ب","Number؛ لأنه أسرع في المعالجة"],["ج","AutoNumber؛ لأنه فريد لكل سجل"],["د","Text؛ لأنه يستهلك مساحة تخزينية أقل"]],"code":""},{"text":"ماذا يسمى المخطط الذي يُظهر كيانات النظام والروابط والعلاقات والحقول؟","options":[["A","ERD"],["B","Queries"],["C","Reports"],["D","Forms"]],"code":""},{"text":"ما الامتداد الافتراضي لملف قاعدة البيانات في الإصدارات الحديثة من Microsoft Access، وما الحد الأقصى لحجمه؟","options":[["A","accdb – 4MB"],["B","accdb – 2GB"],["C","mdb – 2GB"],["D","sqldb – 4GB"]],"code":""},{"text":"إذا بُني استعلامان لهما المعنى نفسه، الأول بكتابة جملة SQL والثاني باختيار الحقول والمعايير في نافذة التصميم، فإن نتيجتهما:","options":[["أ","تختلف دائماً"],["ب","هي نفسها في الحالتين"],["ج","تظهر نتيجة الأول فقط"],["د","تظهر نتيجة الثاني فقط"]],"code":""},{"text":"كيف تُعرض نتيجة تنفيذ استعلام الاختيار؟","options":[["أ","جدول دائم يُضاف إلى مكونات قاعدة البيانات"],["ب","نموذج لإدخال البيانات"],["ج","جدول مؤقت أعمدته الحقول المختارة وصفوفه ما يحدده الشرط"],["د","تقرير جاهز للطباعة"]],"code":""},{"text":"في نظام مستشفى، كل مريض يقيم في غرفة واحدة والغرفة تتسع لعدة مرضى. ما العلاقة من المريض إلى الغرفة؟","options":[["أ","متعدد إلى واحد (M:1)"],["ب","واحد إلى واحد (1:1)"],["ج","متعدد إلى متعدد (M:M)"],["د","علاقة لا تحتاج إلى مفتاح أجنبي"]],"code":""},{"text":"بالاعتماد على جدول employee_tbl، ما ترتيب قيم emp_pay التي تظهر عند تنفيذ الجملة الآتية؟","options":[["A","18, 20, 20, 22, 25, 15"],["B","25, 22, 20, 20, 18, 15"],["C","15, 18, 20, 20, 22, 25"],["D","15, 18, 20, 22, 25"]],"code":"SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"},{"text":"ما اسم الموظف الذي يظهر أولاً في نتيجة الجملة الآتية؟","options":[["A","Hala"],["B","Nour"],["C","Khaled"],["D","Mustafa"]],"code":"SELECT emp_name FROM employee_tbl ORDER BY emp_pay DESC;"},{"text":"صُمّم استعلام على employee_tbl فاختير الحقلان emp_name وemp_pay، وكُتب في معيار emp_pay العبارة \u003c=20، واختير الفرز التصاعدي للحقل emp_pay. ما جملة SQL المكافئة؟","options":[["A","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c20 ORDER BY emp_pay ASC;"],["B","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c=20 ORDER BY emp_pay DESC;"],["C","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c=20 ORDER BY emp_pay ASC;"],["D","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay>=20 ORDER BY emp_pay ASC;"]],"code":""},{"text":"لا يمكن إدخال عملية إعارة لكتاب غير موجود في جدول الكتب. أي خاصية تضمن ذلك؟","options":[["أ","المفتاح المركب"],["ب","الترقيم التلقائي"],["ج","منشئ التعبير"],["د","فرض التكامل المرجعي"]],"code":""},{"text":"ما وظيفة عبارة الشرط (WHERE) في أمر SELECT؟","options":[["أ","استرجاع صفوف معينة ومحددة وفق معايير (شروط) محددة"],["ب","ترتيب الصفوف تصاعدياً أو تنازلياً"],["ج","تحديد الحقول التي ستظهر في النتيجة"],["د","تحديد اسم الجدول المراد الاستعلام عنه"]],"code":""},{"text":"ما مفتاح جدول الوصلة الناتج عن كسر علاقة متعدد إلى متعدد؟","options":[["أ","حقل ترقيم تلقائي فقط ولا يُقبل غيره"],["ب","مفتاح مركب من المفتاحين الأساسيين للجدولين"],["ج","المفتاح الأساسي لأحد الجدولين فقط"],["د","لا يحتاج جدول الوصلة إلى مفتاح"]],"code":""},{"text":"تُستخدم عبارة الشرط WHERE عندما يُطلب استرجاع صفوف معينة ومحددة من:","options":[["أ","حقل واحد فقط"],["ب","جدول واحد فقط ولا تصلح لأكثر من جدول"],["ج","قاعدة البيانات كلها دون أي معايير"],["د","جدول أو أكثر وفق المعايير المحددة في الاستعلام"]],"code":""},{"text":"جدول الإعارة حقوله: (رقم الطالب، رقم متسلسل، رقم الكتاب، تاريخ الإعارة، تاريخ الإرجاع). ما المفاتيح الأجنبية فيه؟","options":[["أ","رقم متسلسل فقط"],["ب","تاريخ الإعارة وتاريخ الإرجاع"],["ج","رقم الطالب ورقم الكتاب"],["د","رقم الطالب فقط"]],"code":""},{"text":"الشرط Salary \u003c> 4000 يعني أن:","options":[["A","الراتب لا يساوي 4000"],["B","الراتب أكبر من 4000 فقط"],["C","الراتب أصغر من 4000 فقط"],["D","الراتب أكبر من أو يساوي 4000"]],"code":""},{"text":"أي الرموز الآتية يُستخدم للتعبير عن (أكبر من أو يساوي) في جملة الشرط؟","options":[["A","\u003c>"],["B",">"],["C",">="],["D","="]],"code":""},{"text":"أي الشروط الآتية يسترجع الموظفين الذين لا تقل أجرتهم بالساعة (emp_pay) عن 20؟","options":[["A","emp_pay\u003c20"],["B","emp_pay>=20"],["C","emp_pay\u003c=20"],["D","emp_pay\u003c>20"]],"code":""},{"text":"عند كتابة المعيار \u003c=20 في صف المعايير تحت الحقل emp_pay في شبكة التصميم، فإن الجزء الذي يظهر في جملة SQL هو:","options":[["A","ORDER BY emp_pay\u003c=20"],["B","SELECT emp_pay\u003c=20"],["C","FROM emp_pay\u003c=20"],["D","WHERE emp_pay\u003c=20"]],"code":""},{"text":"ما الرابطة المنطقية التي تُستخدم لتحقيق مجموعة من الشروط معاً؟","options":[["A","OR"],["B","NOT"],["C","IF"],["D","AND"]],"code":""},{"text":"الشرط Age>30 OR Salary\u003c3500 يُرجع الموظف الذي:","options":[["أ","عمره أكبر من 30 وراتبه أقل من 3500 معاً فقط"],["ب","عمره أكبر من 30 أو راتبه أقل من 3500 (أو الاثنين معاً)"],["ج","عمره أكبر من 30 فقط"],["د","راتبه أقل من 3500 فقط"]],"code":""},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","القيمة النصية Hebron يجب أن توضع بين علامتي تنصيص"],["ب","الحقل City لا يجوز استخدامه في الشرط"],["ج","نقص كلمة FROM"],["د","يجب استبدال = بالرمز \u003c>"]],"code":"SELECT Name FROM Student_tbl WHERE City = Hebron;"},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","لا يجوز استخدام DESC مع Age"],["ب","يجب حذف FROM"],["ج","عبارة WHERE يجب أن تسبق ORDER BY"],["د","لا يجوز الجمع بين ORDER BY وWHERE إطلاقاً"]],"code":"SELECT Name FROM Student_tbl ORDER BY Age DESC WHERE Age>16;"},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","نقص عبارة ORDER BY"],["ب","نقص كلمة FROM قبل اسم الجدول"],["ج","لا يجوز استخدام النجمة (*) مع WHERE"],["د","يجب وضع القيمة 20 بين علامتي تنصيص"]],"code":"SELECT * employee_tbl WHERE emp_pay=20;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["أ","جميع حقول المشاريع التابعة للقسم رقم 2"],["ب","حقل dep_num فقط لجميع المشاريع"],["ج","جميع المشاريع بعد ترتيبها حسب رقم القسم"],["د","خطأ لأن النجمة لا تُستخدم مع WHERE"]],"code":"SELECT * FROM project_tbl WHERE dep_num=2;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Khaled"],["B","Mustafa, Hala"],["C","Rami, Jamal"],["D","Rami, Jamal, Mustafa"]],"code":"SELECT emp_name FROM employee_tbl WHERE emp_pay=20;"},{"text":"كم سجلاً تُرجع الجملة الآتية؟","options":[["A","2"],["B","3"],["C","6"],["D","4"]],"code":"SELECT * FROM employee_tbl WHERE emp_pay\u003c>20;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Mustafa, Hala"],["B","Rami, Jamal, Mustafa, Hala"],["C","Hala"],["D","Khaled, Nour"]],"code":"SELECT emp_name FROM employee_tbl WHERE emp_pay>20;"},{"text":"ما شكل ناتج تنفيذ الجملة الآتية (عدد الأعمدة والصفوف)؟","options":[["أ","عمود واحد وصفّان"],["ب","عمودان و4 صفوف"],["ج","خمسة أعمدة وصفّان"],["د","عمودان وصفّان"]],"code":"SELECT emp_name, emp_pay FROM employee_tbl WHERE proj_num=2;"},{"text":"ما الجملة التي تعرض أسماء الموظفين العاملين في المشروع رقم 1 مرتبين تصاعدياً حسب الأجرة بالساعة؟","options":[["A","SELECT emp_name FROM employee_tbl WHERE emp_pay=1 ORDER BY proj_num ASC;"],["B","SELECT emp_name FROM employee_tbl ORDER BY emp_pay ASC WHERE proj_num=1;"],["C","SELECT emp_name FROM employee_tbl WHERE proj_num=1 ORDER BY emp_pay ASC;"],["D","SELECT emp_name FROM project_tbl WHERE proj_num=1 ORDER BY emp_pay ASC;"]],"code":""},{"text":"أي الجمل الآتية تعرض اسم المشروع وتكلفته الإجمالية للمشاريع التي تزيد تكلفتها الإجمالية عن 2500000 مرتبة تصاعدياً حسب التكلفة؟","options":[["A","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost\u003c2500000 ORDER BY totalcost ASC;"],["B","SELECT proj_name, totalcost FROM project_tbl ORDER BY totalcost ASC WHERE totalcost>2500000;"],["C","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost>2500000 ORDER BY totalcost DESC;"],["D","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost>2500000 ORDER BY totalcost ASC;"]],"code":""},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Dana"],["B","Lina"],["C","Sami, Dana"],["D","Lina, Dana"]],"code":"SELECT Name FROM Student_tbl WHERE Age=17 AND Average>90;"},{"text":"ما ناتج تنفيذ الجملة الآتية (بالترتيب الظاهر)؟","options":[["A","Lina–Nablus, Dana–Ramallah, Yazan–Nablus"],["B","Sami–Hebron, Omar–Hebron"],["C","Yazan–Nablus, Dana–Ramallah, Lina–Nablus"],["D","Yazan–Nablus, Omar–Hebron, Dana–Ramallah"]],"code":"SELECT Name, City FROM Student_tbl WHERE City\u003c>'Hebron' ORDER BY Age DESC;"},{"text":"ما أرقام Id للسجلات الناتجة عن الجملة الآتية؟","options":[["A","102, 104"],["B","102, 103, 104, 105"],["C","103, 105"],["D","101, 102, 103, 104, 105"]],"code":"SELECT * FROM Student_tbl WHERE Average>=92 OR Age>17;"},{"text":"كم سجلاً تُرجع الجملة الآتية؟","options":[["A","1"],["B","2"],["C","3"],["D","4"]],"code":"SELECT * FROM Student_tbl WHERE City='Nablus' OR Average\u003c70;"},{"text":"أي الجمل الآتية تعرض أسماء الطلاب الذين معدلاتهم بين 70 و90 (شاملة) مرتبة تنازلياً حسب المعدل؟","options":[["A","SELECT Name FROM Student_tbl WHERE Average>=70 OR Average\u003c=90 ORDER BY Average DESC;"],["B","SELECT Name FROM Student_tbl WHERE Average>=70 AND Average\u003c=90 ORDER BY Average DESC;"],["C","SELECT Name FROM Student_tbl ORDER BY Average DESC WHERE Average>=70 AND Average\u003c=90;"],["D","SELECT Name Student_tbl WHERE Average>=70 AND Average\u003c=90 ORDER BY Average DESC;"]],"code":""},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Omar, Yazan"],["B","Yazan"],["C","Sami, Omar, Yazan"],["D","Omar"]],"code":"SELECT Name FROM Student_tbl WHERE Average\u003c=75;"},{"text":"ما ناتج تنفيذ الجملة الآتية بالترتيب الظاهر؟","options":[["A","101, 103"],["B","103, 101"],["C","101, 103, 105"],["D","102, 105"]],"code":"SELECT Id FROM Student_tbl WHERE City='Hebron' ORDER BY Id DESC;"}],"tables":{"employee_tbl":[["emp_num","emp_name","emp_pay","tel_num","proj_num"],["31","Khaled","18","3333333","1"],["15","Rami","20","2222222","2"],["12","Jamal","20","1111111","3"],["4","Mustafa","22","4444444","2"],["8","Hala","25","5555555","1"],["20","Nour","15","6666666","3"]],"Student_tbl":[["Id","Name","Age","Average","City"],["101","Sami","17","88","Hebron"],["102","Lina","16","92","Nablus"],["103","Omar","18","75","Hebron"],["104","Dana","17","92","Ramallah"],["105","Yazan","18","60","Nablus"]]}};
+const el=id=>document.getElementById(id);
+const storageKey='shuqba-tech-12-scientific-online-v1';
+const duration=50*60*1000;
+const subject="تكنولوجيا المعلومات للصف الثاني عشر العلمي";
+async function send(body){
+ const response=await fetch('https://wsdvhkdeixwotexlquur.supabase.co/functions/v1/simulator-results',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_WEcwVA21pArWi6HbAbHAUg_ajWl8Pgj'},body:JSON.stringify({...body,exam_subject:subject}),signal:AbortSignal.timeout(20000)});
+ const data=await response.json();
+ if(!response.ok)throw Error(data.error||'تعذر الاتصال بخدمة الامتحان.');
+ return data;
+}
+let state=null,index=0,interval;
+function persist(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch{}}
+function getSaved(){try{return JSON.parse(localStorage.getItem(storageKey))}catch{return null}}
+function render(){
+ const q=data.questions[index], box=el('question');
+ box.replaceChildren();
+ const title=document.createElement('legend');title.textContent=(index+1)+'. '+q.text;box.append(title);
+ if(q.code){const code=document.createElement('pre');code.textContent=q.code;box.append(code)}
+ const optionList=document.createElement('div');
+ q.options.forEach(([symbol,text],i)=>{
+  const label=document.createElement('label');label.className='option';
+  const input=document.createElement('input');input.type='radio';input.name='answer';input.checked=state.answers[index]===i;
+  const name=document.createElement('bdi');name.dir='auto';name.textContent=symbol+'. '+text;
+  input.addEventListener('change',()=>{if(Date.now()>=state.deadline){finish(true);return}state.answers[index]=i;persist();renderNumbers()});
+  label.append(input,name);optionList.append(label);
+ });box.append(optionList);
+ const number=index+1;
+ const ref=[1,2,3,10,11,12,20,21,26,28,29,30,31,32].includes(number)?'employee_tbl':number>=34?'Student_tbl':number===33?'project_tbl':null;
+ el('reference').hidden=!ref;el('reference').open=Boolean(ref);el('tableName').textContent=ref?'جدول '+ref:'';
+ el('table').replaceChildren();
+ if(ref==='project_tbl'){
+  const fields=document.createElement('pre');fields.textContent='proj_num (PK), proj_name, totalcost, dep_num';el('table').append(fields);
+ }else if(ref){
+  const table=document.createElement('table');
+  data.tables[ref].forEach((values,i)=>{
+   const row=table.insertRow();
+   values.forEach(value=>{const cell=document.createElement(i?'td':'th');if(!i)cell.scope='col';cell.textContent=value;row.append(cell)});
+  });el('table').append(table);
+ }
+ el('prev').disabled=index===0;el('next').disabled=index===data.questions.length-1;renderNumbers();
+}
+function renderNumbers(){
+ el('progress').textContent='تمت الإجابة عن '+state.answers.filter(a=>a!==null).length+' من 40';
+ Array.from(el('numbers').children).forEach((button,i)=>{
+  const answered=state.answers[i]!==null;
+  button.classList.toggle('done',answered);button.setAttribute('aria-current',String(index===i));
+  button.setAttribute('aria-label','السؤال '+(i+1)+(answered?'، تمت الإجابة':'، دون إجابة'));
+ });
+}
+function go(i){index=i;render();el('question').querySelector('input').focus({preventScroll:true});window.scrollTo(0,0)}
+function tick(){
+ const seconds=Math.max(0,Math.ceil((state.deadline-Date.now())/1000));
+ el('timer').textContent=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+ el('timer').classList.toggle('ending',seconds<=300);
+ if(!seconds)finish(true);
+}
+function showResult(){
+ el('intro').hidden=true;el('exam').hidden=true;el('result').hidden=false;
+ el('outcome').textContent=state.expired?'انتهى الوقت وسُلّم الامتحان تلقائيًا':'تم تسليم الامتحان';
+ el('identity').textContent=state.student+' · '+state.group;
+ el('retry').hidden=true;
+ el('resultDetails').textContent='عدد الأسئلة المجاب عنها '+state.answers.filter(a=>a!==null).length+' من 40';
+ el('outcome').focus();
+}
+let sending=false;
+async function finish(expired){
+ if(state.finished||sending)return;
+ sending=true;clearInterval(interval);
+ state.pending=true;state.expired=Boolean(state.expired||expired);persist();
+ el('intro').hidden=true;el('exam').hidden=true;el('result').hidden=false;el('retry').hidden=true;
+ el('outcome').textContent='جارٍ حفظ الإجابات';
+ el('resultDetails').textContent='';
+ try{
+  const result=await send({action:'submit',student_name:state.student,branch:'علمي',section:state.group,responses:state.answers,training_code:state.access});
+  if(result.submitted!==true)throw Error('تعذر تأكيد التسليم.');
+  state.finished=true;delete state.pending;delete state.access;persist();showResult();
+ }catch(error){
+  el('outcome').textContent='لم تُحفظ الإجابات بعد';
+  el('resultDetails').textContent=error.message;
+  el('retry').hidden=false;
+ }finally{sending=false}
+}
+el('retry').onclick=()=>finish(state.expired);
+function begin(){
+ if(state.finished){showResult();return}
+ if(state.pending){finish(state.expired);return}
+ el('intro').hidden=true;el('exam').hidden=false;
+ el('numbers').replaceChildren();
+ data.questions.forEach((_,i)=>{const button=document.createElement('button');button.type='button';button.textContent=i+1;button.onclick=()=>go(i);el('numbers').append(button)});
+ render();interval=setInterval(tick,250);tick();
+}
+el('start').addEventListener('submit',async event=>{
+ event.preventDefault();const form=event.currentTarget,values=new FormData(form);
+ const student=values.get('student').trim(),group=values.get('group'),access=values.get('access').trim();
+ if(!student||!group||!access){el('startError').textContent='أدخل الاسم والشعبة ورمز الدخول.';return}
+ const button=form.querySelector('button');button.disabled=true;el('startError').textContent='';
+ try{
+  const result=await send({action:'technology_start',training_code:access});
+  if(result.allowed!==true)throw Error('تعذر بدء الامتحان.');
+  state={student,group,access,deadline:Date.now()+duration,answers:Array(40).fill(null),finished:false};persist();begin();
+ }catch(error){el('startError').textContent=error.message}
+ finally{button.disabled=false}
+});
+el('prev').onclick=()=>go(index-1);el('next').onclick=()=>go(index+1);
+el('submit').onclick=()=>{if(Date.now()>=state.deadline)finish(true);else if(confirm('هل تريد تسليم الامتحان الآن؟'))finish(Date.now()>=state.deadline)};
+state=getSaved();if(state&&Array.isArray(state.answers)&&state.answers.length===40)begin();
+</script>
+</body>
+</html>
