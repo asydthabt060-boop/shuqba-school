@@ -18,20 +18,58 @@ pre{direction:ltr;text-align:left;background:#edf3f2;padding:10px;border-radius:
 table{border-collapse:collapse;direction:ltr;text-align:center;width:100%}th,td{border:1px solid var(--edge);padding:5px 8px}th{background:#e5f4ee}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:7px}.grid button{padding:4px;color:#17352f;background:#fff;border-color:var(--edge)}.grid button.done{background:#d8eee5}.grid button[aria-current=true]{border:2px solid var(--teal);font-weight:700}.controls{justify-content:space-between;margin-top:16px}.grade{font-size:2rem;font-weight:750;color:var(--teal)}
 [hidden]{display:none!important}
+#teacherPortal label{display:block;margin-top:10px}#teacherPortal input{max-width:440px;width:100%;padding:8px;border:1px solid #77918e;border-radius:7px}
+#teacherPortal .teacher-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#teacherPortal .results-wrap{overflow:auto}#teacherPortal .results-table{direction:rtl;min-width:680px}
+#teacherPortal .error,#adminLoadError{color:#a13122}
+@media print{header,#intro,#exam,#result,#teacherLogin,#backToStudent,.teacher-actions{display:none!important}}
 </style>
 </head>
 <body>
 <header><div class="wrap"><p>مدرسة ذكور شقبا الثانوية</p><h1>اختبار الشهرين الأول في التكنولوجيا</h1><p>الصف الثاني عشر العلمي</p></div></header>
 <main class="wrap">
 <section id="intro"><h2>بيانات الطالب</h2><p>40 سؤال اختيار من متعدد، لكل سؤال علامة واحدة. مدة الامتحان 50 دقيقة، ويُسلّم تلقائيًا عند انتهاء الوقت.</p>
-<form id="start"><div class="fields"><label>اسم الطالب<input name="student" type="text" required maxlength="100"></label><label>الشعبة<select name="group" required><option value="">اختر الشعبة</option><option>أ</option><option>ب</option></select></label><label>رمز الدخول<input name="access" type="password" inputmode="numeric" required maxlength="8"></label></div><p id="startError" role="alert"></p><p><button>ابدأ الامتحان</button></p></form></section>
+<form id="start"><div class="fields"><label>اسم الطالب<input name="student" type="text" required maxlength="100"></label><label>الشعبة<select name="group" required><option value="">اختر الشعبة</option><option>أ</option><option>ب</option></select></label><label>رمز الدخول<input name="access" type="password" inputmode="numeric" required maxlength="8"></label></div><p id="startError" role="alert"></p><p><button>ابدأ الامتحان</button></p></form><button class="secondary" type="button" data-admin-entry>دخول الإدارة</button></section>
 <div id="exam" hidden>
 <aside class="status"><strong id="progress"></strong><time id="timer" aria-label="الوقت المتبقي">50:00</time><button id="submit" type="button">تسليم</button></aside>
 <section><fieldset id="question"></fieldset><div class="row controls"><button type="button" class="secondary" id="prev">السابق</button><button type="button" id="next">التالي</button></div></section>
 <details id="reference" hidden><summary id="tableName"></summary><div class="table-scroll" id="table"></div></details>
 <section aria-label="التنقل بين الأسئلة"><h2>الأسئلة</h2><div class="grid" id="numbers"></div></section>
 </div>
-<section id="result" hidden aria-live="polite"><h2 id="outcome" tabindex="-1"></h2><p id="identity"></p><button id="retry" type="button" hidden>إعادة محاولة التسليم</button><p id="resultDetails"></p></section>
+<section id="result" hidden aria-live="polite"><h2 id="outcome" tabindex="-1"></h2><p id="identity"></p><button id="retry" type="button" hidden>إعادة محاولة التسليم</button><p id="resultDetails"></p><button class="secondary" type="button" data-admin-entry>دخول الإدارة</button></section>
+<section class="card" id="teacherPortal" hidden>
+  <div id="teacherLogin">
+    <h2>دخول الإدارة لرصد العلامات</h2>
+    <p class="notice">استخدم حساب الإدارة المسجل في سجل المدرسة.</p>
+    <form id="teacherLoginForm">
+      <label for="teacherEmail">البريد الإلكتروني</label>
+      <input id="teacherEmail" type="email" autocomplete="username" required>
+      <label for="teacherPassword">كلمة المرور</label>
+      <input id="teacherPassword" type="password" autocomplete="current-password" required>
+      <p id="teacherLoginError" class="error" role="alert"></p>
+      <button class="primary" type="submit">تسجيل الدخول</button>
+    </form>
+  </div>
+  <div id="teacherDashboard" hidden>
+    <h2>نتائج امتحان التكنولوجيا للثاني عشر العلمي</h2>
+    <p id="teacherWelcome" class="notice"></p>
+    <div class="teacher-actions">
+      <button class="secondary" id="refreshResults" type="button">تحديث النتائج</button>
+      <button class="secondary" id="printExamResults" type="button">طباعة العلامات</button>
+      <button class="secondary" id="exportResults" type="button" disabled>تنزيل النتائج Excel</button>
+      <a class="secondary gradebook-link" href="gradebook.html">سجل علامات الشهرين وطباعة الشهادات</a>
+      <button class="secondary" id="teacherLogout" type="button">تسجيل الخروج</button>
+    </div>
+    <p id="resultsMessage" class="muted" aria-live="polite"></p>
+    <div class="results-wrap">
+      <table class="results-table">
+        <thead><tr><th>اسم الطالب</th><th>المادة</th><th>الشعبة</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
+        <tbody id="resultsRows"></tbody>
+      </table>
+    </div>
+  </div>
+<p id="adminLoadError" role="alert"></p><button class="secondary" id="backToStudent" type="button">العودة إلى واجهة الطالب</button>
+</section>
 </main>
 <script>
 const data={"questions":[{"text":"لترتيب بيانات جدول employee_tbl تصاعدياً بناءً على حقل الأجرة بالساعة emp_pay، ما جملة SQL الصحيحة؟","options":[["A","SELECT * FROM employee_tbl SORT emp_pay ASC;"],["B","SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"],["C","SELECT * ORDER BY emp_pay FROM employee_tbl ASC;"],["D","SELECT * FROM emp_pay ORDER BY employee_tbl ASC;"]],"code":""},{"text":"ما معنى النجمة (*) في الجملة الآتية؟","options":[["أ","اختيار الحقل الأول فقط من الجدول"],["ب","ضرب قيم الحقول بعضها ببعض"],["ج","اختيار جميع حقول الجدول"],["د","حذف جميع حقول الجدول"]],"code":"SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"},{"text":"ما جملة SQL التي تعرض بيانات الجدول employee_tbl مرتبة تنازلياً حسب الأجرة بالساعة emp_pay؟","options":[["A","SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"],["B","SELECT * FROM employee_tbl ORDER BY DESC emp_pay;"],["C","SELECT * FROM employee_tbl DESC emp_pay;"],["D","SELECT * FROM employee_tbl ORDER BY emp_pay DESC;"]],"code":""},{"text":"يصلح للحقل (اسم المهندس) النوعان Text وMemo. أيهما يُختار ولماذا؟","options":[["أ","Memo؛ لأنه يتسع لرموز أكثر"],["ب","Number؛ لأنه أسرع في المعالجة"],["ج","AutoNumber؛ لأنه فريد لكل سجل"],["د","Text؛ لأنه يستهلك مساحة تخزينية أقل"]],"code":""},{"text":"ماذا يسمى المخطط الذي يُظهر كيانات النظام والروابط والعلاقات والحقول؟","options":[["A","ERD"],["B","Queries"],["C","Reports"],["D","Forms"]],"code":""},{"text":"ما الامتداد الافتراضي لملف قاعدة البيانات في الإصدارات الحديثة من Microsoft Access، وما الحد الأقصى لحجمه؟","options":[["A","accdb – 4MB"],["B","accdb – 2GB"],["C","mdb – 2GB"],["D","sqldb – 4GB"]],"code":""},{"text":"إذا بُني استعلامان لهما المعنى نفسه، الأول بكتابة جملة SQL والثاني باختيار الحقول والمعايير في نافذة التصميم، فإن نتيجتهما:","options":[["أ","تختلف دائماً"],["ب","هي نفسها في الحالتين"],["ج","تظهر نتيجة الأول فقط"],["د","تظهر نتيجة الثاني فقط"]],"code":""},{"text":"كيف تُعرض نتيجة تنفيذ استعلام الاختيار؟","options":[["أ","جدول دائم يُضاف إلى مكونات قاعدة البيانات"],["ب","نموذج لإدخال البيانات"],["ج","جدول مؤقت أعمدته الحقول المختارة وصفوفه ما يحدده الشرط"],["د","تقرير جاهز للطباعة"]],"code":""},{"text":"في نظام مستشفى، كل مريض يقيم في غرفة واحدة والغرفة تتسع لعدة مرضى. ما العلاقة من المريض إلى الغرفة؟","options":[["أ","متعدد إلى واحد (M:1)"],["ب","واحد إلى واحد (1:1)"],["ج","متعدد إلى متعدد (M:M)"],["د","علاقة لا تحتاج إلى مفتاح أجنبي"]],"code":""},{"text":"بالاعتماد على جدول employee_tbl، ما ترتيب قيم emp_pay التي تظهر عند تنفيذ الجملة الآتية؟","options":[["A","18, 20, 20, 22, 25, 15"],["B","25, 22, 20, 20, 18, 15"],["C","15, 18, 20, 20, 22, 25"],["D","15, 18, 20, 22, 25"]],"code":"SELECT * FROM employee_tbl ORDER BY emp_pay ASC;"},{"text":"ما اسم الموظف الذي يظهر أولاً في نتيجة الجملة الآتية؟","options":[["A","Hala"],["B","Nour"],["C","Khaled"],["D","Mustafa"]],"code":"SELECT emp_name FROM employee_tbl ORDER BY emp_pay DESC;"},{"text":"صُمّم استعلام على employee_tbl فاختير الحقلان emp_name وemp_pay، وكُتب في معيار emp_pay العبارة \u003c=20، واختير الفرز التصاعدي للحقل emp_pay. ما جملة SQL المكافئة؟","options":[["A","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c20 ORDER BY emp_pay ASC;"],["B","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c=20 ORDER BY emp_pay DESC;"],["C","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay\u003c=20 ORDER BY emp_pay ASC;"],["D","SELECT emp_name, emp_pay FROM employee_tbl WHERE emp_pay>=20 ORDER BY emp_pay ASC;"]],"code":""},{"text":"لا يمكن إدخال عملية إعارة لكتاب غير موجود في جدول الكتب. أي خاصية تضمن ذلك؟","options":[["أ","المفتاح المركب"],["ب","الترقيم التلقائي"],["ج","منشئ التعبير"],["د","فرض التكامل المرجعي"]],"code":""},{"text":"ما وظيفة عبارة الشرط (WHERE) في أمر SELECT؟","options":[["أ","استرجاع صفوف معينة ومحددة وفق معايير (شروط) محددة"],["ب","ترتيب الصفوف تصاعدياً أو تنازلياً"],["ج","تحديد الحقول التي ستظهر في النتيجة"],["د","تحديد اسم الجدول المراد الاستعلام عنه"]],"code":""},{"text":"ما مفتاح جدول الوصلة الناتج عن كسر علاقة متعدد إلى متعدد؟","options":[["أ","حقل ترقيم تلقائي فقط ولا يُقبل غيره"],["ب","مفتاح مركب من المفتاحين الأساسيين للجدولين"],["ج","المفتاح الأساسي لأحد الجدولين فقط"],["د","لا يحتاج جدول الوصلة إلى مفتاح"]],"code":""},{"text":"تُستخدم عبارة الشرط WHERE عندما يُطلب استرجاع صفوف معينة ومحددة من:","options":[["أ","حقل واحد فقط"],["ب","جدول واحد فقط ولا تصلح لأكثر من جدول"],["ج","قاعدة البيانات كلها دون أي معايير"],["د","جدول أو أكثر وفق المعايير المحددة في الاستعلام"]],"code":""},{"text":"جدول الإعارة حقوله: (رقم الطالب، رقم متسلسل، رقم الكتاب، تاريخ الإعارة، تاريخ الإرجاع). ما المفاتيح الأجنبية فيه؟","options":[["أ","رقم متسلسل فقط"],["ب","تاريخ الإعارة وتاريخ الإرجاع"],["ج","رقم الطالب ورقم الكتاب"],["د","رقم الطالب فقط"]],"code":""},{"text":"الشرط Salary \u003c> 4000 يعني أن:","options":[["A","الراتب لا يساوي 4000"],["B","الراتب أكبر من 4000 فقط"],["C","الراتب أصغر من 4000 فقط"],["D","الراتب أكبر من أو يساوي 4000"]],"code":""},{"text":"أي الرموز الآتية يُستخدم للتعبير عن (أكبر من أو يساوي) في جملة الشرط؟","options":[["A","\u003c>"],["B",">"],["C",">="],["D","="]],"code":""},{"text":"أي الشروط الآتية يسترجع الموظفين الذين لا تقل أجرتهم بالساعة (emp_pay) عن 20؟","options":[["A","emp_pay\u003c20"],["B","emp_pay>=20"],["C","emp_pay\u003c=20"],["D","emp_pay\u003c>20"]],"code":""},{"text":"عند كتابة المعيار \u003c=20 في صف المعايير تحت الحقل emp_pay في شبكة التصميم، فإن الجزء الذي يظهر في جملة SQL هو:","options":[["A","ORDER BY emp_pay\u003c=20"],["B","SELECT emp_pay\u003c=20"],["C","FROM emp_pay\u003c=20"],["D","WHERE emp_pay\u003c=20"]],"code":""},{"text":"ما الرابطة المنطقية التي تُستخدم لتحقيق مجموعة من الشروط معاً؟","options":[["A","OR"],["B","NOT"],["C","IF"],["D","AND"]],"code":""},{"text":"الشرط Age>30 OR Salary\u003c3500 يُرجع الموظف الذي:","options":[["أ","عمره أكبر من 30 وراتبه أقل من 3500 معاً فقط"],["ب","عمره أكبر من 30 أو راتبه أقل من 3500 (أو الاثنين معاً)"],["ج","عمره أكبر من 30 فقط"],["د","راتبه أقل من 3500 فقط"]],"code":""},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","القيمة النصية Hebron يجب أن توضع بين علامتي تنصيص"],["ب","الحقل City لا يجوز استخدامه في الشرط"],["ج","نقص كلمة FROM"],["د","يجب استبدال = بالرمز \u003c>"]],"code":"SELECT Name FROM Student_tbl WHERE City = Hebron;"},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","لا يجوز استخدام DESC مع Age"],["ب","يجب حذف FROM"],["ج","عبارة WHERE يجب أن تسبق ORDER BY"],["د","لا يجوز الجمع بين ORDER BY وWHERE إطلاقاً"]],"code":"SELECT Name FROM Student_tbl ORDER BY Age DESC WHERE Age>16;"},{"text":"ما الخطأ في الجملة الآتية؟","options":[["أ","نقص عبارة ORDER BY"],["ب","نقص كلمة FROM قبل اسم الجدول"],["ج","لا يجوز استخدام النجمة (*) مع WHERE"],["د","يجب وضع القيمة 20 بين علامتي تنصيص"]],"code":"SELECT * employee_tbl WHERE emp_pay=20;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["أ","جميع حقول المشاريع التابعة للقسم رقم 2"],["ب","حقل dep_num فقط لجميع المشاريع"],["ج","جميع المشاريع بعد ترتيبها حسب رقم القسم"],["د","خطأ لأن النجمة لا تُستخدم مع WHERE"]],"code":"SELECT * FROM project_tbl WHERE dep_num=2;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Khaled"],["B","Mustafa, Hala"],["C","Rami, Jamal"],["D","Rami, Jamal, Mustafa"]],"code":"SELECT emp_name FROM employee_tbl WHERE emp_pay=20;"},{"text":"كم سجلاً تُرجع الجملة الآتية؟","options":[["A","2"],["B","3"],["C","6"],["D","4"]],"code":"SELECT * FROM employee_tbl WHERE emp_pay\u003c>20;"},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Mustafa, Hala"],["B","Rami, Jamal, Mustafa, Hala"],["C","Hala"],["D","Khaled, Nour"]],"code":"SELECT emp_name FROM employee_tbl WHERE emp_pay>20;"},{"text":"ما شكل ناتج تنفيذ الجملة الآتية (عدد الأعمدة والصفوف)؟","options":[["أ","عمود واحد وصفّان"],["ب","عمودان و4 صفوف"],["ج","خمسة أعمدة وصفّان"],["د","عمودان وصفّان"]],"code":"SELECT emp_name, emp_pay FROM employee_tbl WHERE proj_num=2;"},{"text":"ما الجملة التي تعرض أسماء الموظفين العاملين في المشروع رقم 1 مرتبين تصاعدياً حسب الأجرة بالساعة؟","options":[["A","SELECT emp_name FROM employee_tbl WHERE emp_pay=1 ORDER BY proj_num ASC;"],["B","SELECT emp_name FROM employee_tbl ORDER BY emp_pay ASC WHERE proj_num=1;"],["C","SELECT emp_name FROM employee_tbl WHERE proj_num=1 ORDER BY emp_pay ASC;"],["D","SELECT emp_name FROM project_tbl WHERE proj_num=1 ORDER BY emp_pay ASC;"]],"code":""},{"text":"أي الجمل الآتية تعرض اسم المشروع وتكلفته الإجمالية للمشاريع التي تزيد تكلفتها الإجمالية عن 2500000 مرتبة تصاعدياً حسب التكلفة؟","options":[["A","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost\u003c2500000 ORDER BY totalcost ASC;"],["B","SELECT proj_name, totalcost FROM project_tbl ORDER BY totalcost ASC WHERE totalcost>2500000;"],["C","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost>2500000 ORDER BY totalcost DESC;"],["D","SELECT proj_name, totalcost FROM project_tbl WHERE totalcost>2500000 ORDER BY totalcost ASC;"]],"code":""},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Dana"],["B","Lina"],["C","Sami, Dana"],["D","Lina, Dana"]],"code":"SELECT Name FROM Student_tbl WHERE Age=17 AND Average>90;"},{"text":"ما ناتج تنفيذ الجملة الآتية (بالترتيب الظاهر)؟","options":[["A","Lina–Nablus, Dana–Ramallah, Yazan–Nablus"],["B","Sami–Hebron, Omar–Hebron"],["C","Yazan–Nablus, Dana–Ramallah, Lina–Nablus"],["D","Yazan–Nablus, Omar–Hebron, Dana–Ramallah"]],"code":"SELECT Name, City FROM Student_tbl WHERE City\u003c>'Hebron' ORDER BY Age DESC;"},{"text":"ما أرقام Id للسجلات الناتجة عن الجملة الآتية؟","options":[["A","102, 104"],["B","102, 103, 104, 105"],["C","103, 105"],["D","101, 102, 103, 104, 105"]],"code":"SELECT * FROM Student_tbl WHERE Average>=92 OR Age>17;"},{"text":"كم سجلاً تُرجع الجملة الآتية؟","options":[["A","1"],["B","2"],["C","3"],["D","4"]],"code":"SELECT * FROM Student_tbl WHERE City='Nablus' OR Average\u003c70;"},{"text":"أي الجمل الآتية تعرض أسماء الطلاب الذين معدلاتهم بين 70 و90 (شاملة) مرتبة تنازلياً حسب المعدل؟","options":[["A","SELECT Name FROM Student_tbl WHERE Average>=70 OR Average\u003c=90 ORDER BY Average DESC;"],["B","SELECT Name FROM Student_tbl WHERE Average>=70 AND Average\u003c=90 ORDER BY Average DESC;"],["C","SELECT Name FROM Student_tbl ORDER BY Average DESC WHERE Average>=70 AND Average\u003c=90;"],["D","SELECT Name Student_tbl WHERE Average>=70 AND Average\u003c=90 ORDER BY Average DESC;"]],"code":""},{"text":"ما ناتج تنفيذ الجملة الآتية؟","options":[["A","Omar, Yazan"],["B","Yazan"],["C","Sami, Omar, Yazan"],["D","Omar"]],"code":"SELECT Name FROM Student_tbl WHERE Average\u003c=75;"},{"text":"ما ناتج تنفيذ الجملة الآتية بالترتيب الظاهر؟","options":[["A","101, 103"],["B","103, 101"],["C","101, 103, 105"],["D","102, 105"]],"code":"SELECT Id FROM Student_tbl WHERE City='Hebron' ORDER BY Id DESC;"}],"tables":{"employee_tbl":[["emp_num","emp_name","emp_pay","tel_num","proj_num"],["31","Khaled","18","3333333","1"],["15","Rami","20","2222222","2"],["12","Jamal","20","1111111","3"],["4","Mustafa","22","4444444","2"],["8","Hala","25","5555555","1"],["20","Nour","15","6666666","3"]],"Student_tbl":[["Id","Name","Age","Average","City"],["101","Sami","17","88","Hebron"],["102","Lina","16","92","Nablus"],["103","Omar","18","75","Hebron"],["104","Dana","17","92","Ramallah"],["105","Yazan","18","60","Nablus"]]}};
@@ -141,6 +179,169 @@ el('start').addEventListener('submit',async event=>{
 el('prev').onclick=()=>go(index-1);el('next').onclick=()=>go(index+1);
 el('submit').onclick=()=>{if(Date.now()>=state.deadline)finish(true);else if(confirm('هل تريد تسليم الامتحان الآن؟'))finish(Date.now()>=state.deadline)};
 state=getSaved();if(state&&Array.isArray(state.answers)&&state.answers.length===40)begin();
+</script>
+<script>
+(()=>{
+ const intro=document.getElementById("intro"),result=document.getElementById("result"),panel=document.getElementById("teacherPortal");
+ const login=document.getElementById("teacherLogin"),error=document.getElementById("adminLoadError");
+ let loadAuth,loaded=false,previous;
+ function loadScript(url){
+  return new Promise((resolve,reject)=>{
+   const script=document.createElement("script");script.src=url;script.onload=resolve;
+   script.onerror=()=>{script.remove();reject(Error("تعذر تحميل تسجيل دخول الإدارة. أعد المحاولة."))};
+   document.head.append(script);
+  });
+ }
+ async function openAdmin(){
+  previous=intro.hidden?result:intro;previous.hidden=true;panel.hidden=false;error.textContent="";
+  if(loaded)return;
+  login.hidden=true;
+  try{
+   loadAuth ||= loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+   await loadAuth;
+   if(!loaded){
+    initAdmin();loaded=true;
+    loadScript("https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js").catch(()=>{});
+   }
+   login.hidden=false;
+  }catch(e){loadAuth=null;error.textContent=e.message}
+ }
+ document.querySelectorAll("[data-admin-entry]").forEach(button=>button.addEventListener("click",openAdmin));
+ document.getElementById("backToStudent").addEventListener("click",()=>{panel.hidden=true;previous.hidden=false;});
+ function initAdmin(){
+ 
+const RESULTS_URL = "https://wsdvhkdeixwotexlquur.supabase.co";
+const RESULTS_KEY = "sb_publishable_WEcwVA21pArWi6HbAbHAUg_ajWl8Pgj";
+const SCHOOL_AUTH_URL = "https://nxfnpkelpzpvuotuwmrn.supabase.co";
+const SCHOOL_AUTH_KEY = "sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp";
+const staffDb = window.supabase.createClient(SCHOOL_AUTH_URL, SCHOOL_AUTH_KEY);
+let currentTeacherResults=[];
+document.getElementById("teacherLoginForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const errorBox=document.getElementById("teacherLoginError");
+  errorBox.textContent="جارٍ التحقق من الحساب...";
+  const {error}=await staffDb.auth.signInWithPassword({
+    email:document.getElementById("teacherEmail").value.trim(),
+    password:document.getElementById("teacherPassword").value
+  });
+  if(error){
+    errorBox.textContent="تعذر الدخول. تحقق من بيانات الحساب.";
+    return;
+  }
+  document.getElementById("teacherPassword").value="";
+  await openTeacherResults();
+});
+document.getElementById("exportResults").addEventListener("click",exportTeacherResults);
+document.getElementById("refreshResults").addEventListener("click",loadTeacherResults);
+document.getElementById("printExamResults").addEventListener("click",()=>window.print());
+document.getElementById("teacherLogout").addEventListener("click",async()=>{
+  await staffDb.auth.signOut();
+  currentTeacherResults=[];
+  document.getElementById("resultsRows").replaceChildren();
+  document.getElementById("exportResults").disabled=true;
+  document.getElementById("teacherDashboard").hidden=true;
+  document.getElementById("teacherLogin").hidden=false;
+  document.getElementById("teacherLoginError").textContent="";
+});
+async function openTeacherResults(){
+  const errorBox=document.getElementById("teacherLoginError");
+  const {data:{user}}=await staffDb.auth.getUser();
+  if(!user){errorBox.textContent="سجّل الدخول بحساب الإدارة.";return;}
+  const {data:profile,error}=await staffDb.from("school_profiles")
+    .select("full_name,role").eq("user_id",user.id).maybeSingle();
+  if(error||!profile||profile.role!=="admin"){
+    errorBox.textContent="هذا الحساب ليس له صلاحية عرض العلامات.";
+    return;
+  }
+  document.getElementById("teacherLogin").hidden=true;
+  document.getElementById("teacherDashboard").hidden=false;
+  document.getElementById("teacherWelcome").textContent=
+    "مرحبًا "+profile.full_name+" — النتائج المسجلة";
+  await loadTeacherResults();
+}
+function exportTeacherResults(){
+  if(!currentTeacherResults.length) return;
+  if(!window.XLSX){
+    document.getElementById("resultsMessage").textContent="تعذر تجهيز ملف Excel. تحقق من اتصال الإنترنت ثم حدّث النتائج.";
+    return;
+  }
+  const safeText=value=>{
+    const text=String(value??"");
+    return /^[=+@\-\t\r]/.test(text) ? "'"+text : text;
+  };
+  const data=[
+    ["اسم الطالب","المادة","الشعبة","العلامة","عدد الإجابات","حالة العلامة","وقت التسليم"],
+    ...currentTeacherResults.map(item=>[
+      safeText(item.student_name),
+      safeText(item.subject),
+      safeText(item.class_section??"—"),
+      safeText(item.score+" / "+item.max_score),
+      safeText(item.answered_count+" / "+item.max_score),
+      safeText(item.is_provisional?"تجريبية":"معتمدة"),
+      safeText(new Date(item.created_at).toLocaleString("ar-PS"))
+    ])
+  ];
+  const worksheet=XLSX.utils.aoa_to_sheet(data);
+  worksheet["!cols"]=[{wch:28},{wch:24},{wch:14},{wch:14},{wch:16},{wch:16},{wch:24}];
+  const workbook=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook,worksheet,"نتائج الطلاب");
+  const date=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(workbook,"نتائج_التكنولوجيا_الثاني_عشر_العلمي_"+date+".xlsx",{compression:true});
+}
+
+async function loadTeacherResults(){
+  currentTeacherResults=[];
+  const exportButton=document.getElementById("exportResults");
+  exportButton.disabled=true;
+  const message=document.getElementById("resultsMessage");
+  const rows=document.getElementById("resultsRows");
+  message.textContent="جارٍ تحميل النتائج...";
+  rows.replaceChildren();
+  const {data:{session}}=await staffDb.auth.getSession();
+  if(!session){message.textContent="انتهت الجلسة. سجّل الدخول مجددًا.";return;}
+  try{
+    const response=await fetch(RESULTS_URL+"/functions/v1/simulator-results",{
+      method:"POST",
+      headers:{
+        "apikey":RESULTS_KEY,
+        "Authorization":"Bearer "+session.access_token,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({action:"list",exam_subject:"تكنولوجيا المعلومات للصف الثاني عشر العلمي",branch:"علمي"})
+    });
+    const payload=await response.json();
+    if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
+    currentTeacherResults=payload.results.filter(item=>item.subject==="تكنولوجيا المعلومات" && item.grade===12 && item.branch==="علمي" && item.max_score===40);
+    if(!currentTeacherResults.length){message.textContent="لا توجد تسليمات مسجلة لهذا الامتحان بعد.";return;}
+    exportButton.disabled=false;
+    currentTeacherResults.forEach(item=>{
+      const row=document.createElement("tr");
+      const values=[
+        item.student_name,
+        item.subject,
+        item.class_section??"—",
+        item.score+" / "+item.max_score,
+        item.answered_count+" / "+item.max_score,
+        item.is_provisional?"تجريبية":"معتمدة",
+        new Date(item.created_at).toLocaleString("ar-PS")
+      ];
+      values.forEach(value=>{
+        const cell=document.createElement("td");
+        cell.textContent=String(value);
+        row.appendChild(cell);
+      });
+      rows.appendChild(row);
+    });
+    message.textContent="عدد النتائج المعروضة: "+currentTeacherResults.length+
+      (currentTeacherResults.length===500?" (الحد الأقصى للعرض 500).":"");
+  }catch(error){
+    message.textContent=error.message||"تعذر تحميل النتائج.";
+  }
+}
+
+
+ }
+})();
 </script>
 </body>
 </html>
