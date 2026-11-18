@@ -119,6 +119,10 @@ function mergedEntries(){
   const map=new Map();
   manualMarks.forEach(m=>map.set(norm(m.student_name)+"|"+norm(m.subject),{...m,source:"يدوي"}));
   examResults.forEach(m=>{
+    const isLiteraryEnglish = m.branch === "أدبي" && m.subject === "اللغة الإنجليزية";
+    const isRetake = Number(m.max_score) === 29 && m.is_provisional === false;
+    if (isLiteraryEnglish && !isRetake) return;
+
     const key=norm(m.student_name)+"|"+norm(m.subject);
     map.set(key,{...m,class_name:selectedClass||("الثاني عشر "+m.branch),source:"إلكتروني"});
   });
