@@ -111,7 +111,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   </p>
 
   <label for="studentName">اسم الطالب</label>
-  <input id="studentName" type="text" placeholder="أدخل اسم الطالب">
+  <input id="studentName" type="text" maxlength="100" placeholder="أدخل اسم الطالب">
 
   <label for="branch">الفرع — الصف الثاني عشر العلمي</label>
   <select id="branch" class="field-select">
@@ -152,12 +152,14 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
       <option value="أدبي">أدبي</option>
     </select>
     <div class="teacher-actions">
+      <button class="secondary" id="showAnswerKey" type="button" hidden>عرض مفتاح الإجابات</button>
       <button class="secondary" id="refreshResults" type="button">تحديث النتائج</button>
       <button class="secondary" id="printExamResults" type="button">طباعة العلامات</button>
       <button class="secondary" id="exportResults" type="button" disabled>تنزيل النتائج Excel</button>
       <a class="secondary gradebook-link" href="gradebook.html">سجل علامات الشهرين وطباعة الشهادات</a>
       <button class="secondary" id="teacherLogout" type="button">تسجيل الخروج</button>
     </div>
+    <ol id="answerKeyList" hidden dir="ltr"></ol><p id="answerKeyError" role="status"></p>
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
     <div class="results-wrap">
       <table class="results-table">
@@ -604,6 +606,22 @@ let remainingSeconds = 3600;
 let timerInterval = null;
 let submitted = false;
 let studentName = "";
+let attemptId = "";
+let deadline = 0;
+let accessCode = "";
+let answers = Array(40).fill(null);
+let pending = false;
+const attemptKey = "shuqba-scientific-english-retake";
+function persist(){
+  try{localStorage.setItem(attemptKey,JSON.stringify({attemptId,studentName,branchName,deadline,accessCode,answers,pending}));}catch{}
+}
+function restore(){
+  let saved;try{saved=JSON.parse(localStorage.getItem(attemptKey));}catch{}
+  if(!saved?.attemptId || !saved.accessCode || !Array.isArray(saved.answers) || saved.answers.length!==40)return;
+  ({attemptId,studentName,branchName,deadline,accessCode,answers,pending}=saved);
+  showAttempt();
+  if(pending || Date.now()>=deadline)finishExam(true);
+}
 
 const login = document.getElementById("login");
 const exam = document.getElementById("exam");
@@ -690,7 +708,7 @@ function updateTimer(){
     String(seconds).padStart(2,"0");
 }
 
-function startExam(){
+async function startExam(){
   const studentNameInput = document.getElementById("studentName").value.trim();
   const code = document.getElementById("trainingCode").value.trim();
   const branch = document.getElementById("branch").value;
@@ -701,32 +719,44 @@ function startExam(){
     return;
   }
 
-  if(code !== "123123"){
-    error.textContent = "رمز التدريب غير صحيح.";
-    return;
-  }
-
-  error.textContent = "";
-  studentName = studentNameInput;
-  branchName = branch;
-  submitted = false;
-  remainingSeconds = 3600;
-
-  prepareQuestions();
-  renderQuestions();
-  updateTimer();
-
-  document.getElementById("studentInfo").textContent =
-    "اسم الطالب: " + studentName + " — الفرع: " + branchName;
-
-  login.hidden = true;
-  result.hidden = true;
-  exam.hidden = false;
-
+  const button=document.getElementById("startBtn");
+  button.disabled=true;error.textContent="";
+  try{
+    const res=await fetch(RESULTS_URL+"/functions/v1/simulator-results",{
+      method:"POST",headers:{apikey:RESULTS_KEY,"Content-Type":"application/json"},
+      body:JSON.stringify({action:"scientific_english_start",training_code:code}),
+      signal:AbortSignal.timeout(20000)
+    });
+    const data=await res.json();
+    if(!res.ok||data.allowed!==true)throw Error(data.error||"تعذر بدء الامتحان.");
+    attemptId=crypto.randomUUID();accessCode=code;studentName=studentNameInput;branchName=branch;
+    deadline=Date.now()+3600000;
+    showAttempt();persist();
+  }catch(e){error.textContent=e.message||"تعذر الاتصال بخدمة الامتحان.";}
+  finally{button.disabled=false;}
+}
+function captureAnswers(){
+  examQuestions.forEach((item,index)=>{
+    const selected=document.querySelector('input[name="question'+index+'"]:checked');
+    answers[item.originalIndex]=selected?item.options[Number(selected.value)].originalOptionIndex:null;
+  });
+}
+function showAttempt(){
+  prepareQuestions();renderQuestions();
+  examQuestions.forEach((item,index)=>{
+    const choice=item.options.findIndex(o=>o.originalOptionIndex===answers[item.originalIndex]);
+    if(choice>=0){
+      const selected=document.querySelector('input[name="question'+index+'"][value="'+choice+'"]');
+      if(selected)selected.checked=true;
+    }
+  });
+  remainingSeconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));updateTimer();
+  document.getElementById("studentInfo").textContent="اسم الطالب: "+studentName+" — الفرع: "+branchName;
+  login.hidden=true;result.hidden=true;exam.hidden=false;
   timerInterval = setInterval(() => {
     if(submitted) return;
 
-    remainingSeconds--;
+    remainingSeconds=Math.max(0,Math.ceil((deadline-Date.now())/1000));
     updateTimer();
 
     if(remainingSeconds <= 0){
@@ -746,19 +776,9 @@ async function finishExam(timeEnded){
   submitButton.disabled = true;
   submitButton.textContent = "جارٍ حفظ النتيجة...";
 
-  const responses = Array(40).fill(null);
-  let answered = 0;
-  examQuestions.forEach((item,index) => {
-    const selected = document.querySelector(
-      'input[name="question' + index + '"]:checked'
-    );
-    if(selected){
-      answered++;
-      const option = item.options[Number(selected.value)];
-      responses[item.originalIndex] = option.originalOptionIndex;
-    }
-  });
-
+  if(!pending)captureAnswers();
+  pending=true;persist();
+  questionsContainer.querySelectorAll("input").forEach(input=>{input.disabled=true;});
   try{
     const response = await fetch(RESULTS_URL + "/functions/v1/simulator-results",{
       method:"POST",
@@ -771,20 +791,15 @@ async function finishExam(timeEnded){
         exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي",
         student_name:studentName,
         branch:branchName,
-        training_code:document.getElementById("trainingCode").value.trim(),
-        responses
-      })
+        training_code:accessCode,
+        attempt_id:attemptId,
+        responses:answers
+      }),
+      signal:AbortSignal.timeout(20000)
     });
     const payload = await response.json();
-    if(response.status === 409){
-      exam.hidden = true;
-      result.hidden = false;
-      document.getElementById("resultStudent").textContent =
-        "هذه المحاولة مسجلة مسبقًا، ولم تُضف محاولة جديدة.";
-      document.getElementById("resultNotice").textContent = "";
-      return;
-    }
-    if(!response.ok) throw new Error(payload.error || "تعذر حفظ النتيجة.");
+    if(!response.ok||payload.submitted!==true)throw Error(payload.error||"تعذر تأكيد حفظ النتيجة.");
+    try{localStorage.removeItem(attemptKey);}catch{}
 
     exam.hidden = true;
     result.hidden = false;
@@ -831,6 +846,9 @@ document.getElementById("refreshResults").addEventListener("click",loadTeacherRe
 document.getElementById("printExamResults").addEventListener("click",()=>window.print());
 document.getElementById("teacherLogout").addEventListener("click",async()=>{
   await staffDb.auth.signOut();
+  document.getElementById("answerKeyList").replaceChildren();
+  document.getElementById("answerKeyList").hidden=true;
+  document.getElementById("answerKeyError").textContent="";
   currentTeacherResults=[];
   document.getElementById("exportResults").disabled=true;
   document.getElementById("teacherDashboard").hidden=true;
@@ -851,6 +869,7 @@ async function openTeacherResults(){
   document.getElementById("teacherDashboard").hidden=false;
   document.getElementById("teacherWelcome").textContent=
     "مرحبًا "+profile.full_name+" — النتائج المسجلة";
+  document.getElementById("showAnswerKey").hidden=profile.role!=="admin";
   await loadTeacherResults();
 }
 function exportTeacherResults(){
@@ -885,6 +904,28 @@ function exportTeacherResults(){
   XLSX.writeFile(workbook,"نتائج_الطلاب_"+branchLabel+"_"+date+".xlsx",{compression:true});
 }
 
+document.getElementById("showAnswerKey").addEventListener("click",async()=>{
+  const list=document.getElementById("answerKeyList"), status=document.getElementById("answerKeyError");
+  if(!list.hidden){list.hidden=true;list.replaceChildren();return;}
+  const {data:{session}}=await staffDb.auth.getSession();
+  if(!session){status.textContent="سجّل الدخول بحساب الإدارة.";return;}
+  status.textContent="";
+  try{
+    const response=await fetch(RESULTS_URL+"/functions/v1/simulator-results",{
+      method:"POST",headers:{apikey:RESULTS_KEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
+      body:JSON.stringify({action:"scientific_english_answer_key"})
+    });
+    const data=await response.json();
+    if(!response.ok || !Array.isArray(data.answer_key) || data.answer_key.length!==originalQuestions.length)throw Error(data.error||"تعذر تحميل مفتاح الإجابات.");
+    list.replaceChildren();
+    data.answer_key.forEach((choice,index)=>{
+      const row=document.createElement("li");
+      row.textContent=originalQuestions[index].q+" — "+originalQuestions[index].options[choice];
+      list.append(row);
+    });
+    list.hidden=false;
+  }catch(e){status.textContent=e.message;}
+});
 async function loadTeacherResults(){
   currentTeacherResults=[];
   const exportButton=document.getElementById("exportResults");
@@ -903,7 +944,7 @@ async function loadTeacherResults(){
         "Authorization":"Bearer "+session.access_token,
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({action:"list",branch:document.getElementById("resultsBranch").value})
+      body:JSON.stringify({action:"list",exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي",branch:"علمي"})
     });
     const payload=await response.json();
     if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
@@ -935,6 +976,8 @@ async function loadTeacherResults(){
   }
 }
 
+questionsContainer.addEventListener("change",()=>{if(!pending){captureAnswers();persist();}});
+restore();
 document.getElementById("examForm").addEventListener("submit",event => {
   event.preventDefault();
   finishExam(false);
