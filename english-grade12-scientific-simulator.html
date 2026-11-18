@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>امتحان اللغة الإنجليزية — الصف الثاني عشر العلمي | مدرسة ذكور شقبا الثانوية</title>
+<title>إعادة امتحان اللغة الإنجليزية — الصف الثاني عشر العلمي | مدرسة ذكور شقبا الثانوية</title>
 <style>
 *{box-sizing:border-box}
 body{
@@ -99,7 +99,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     </div>
     <span class="header-spacer" aria-hidden="true"></span>
   </div>
-  <h1>امتحان اللغة الإنجليزية — الصف الثاني عشر العلمي</h1>
+  <h1>إعادة امتحان اللغة الإنجليزية — الصف الثاني عشر العلمي</h1>
 </header>
 
 <main class="container">
@@ -111,7 +111,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   </p>
 
   <label for="studentName">اسم الطالب</label>
-  <input id="studentName" type="text" maxlength="100" placeholder="أدخل اسم الطالب">
+  <input id="studentName" type="text" maxlength="100" placeholder="أدخل اسمك الكامل كما في الكشف">
 
   <label for="branch">الفرع — الصف الثاني عشر العلمي</label>
   <select id="branch" class="field-select">
@@ -611,7 +611,7 @@ let deadline = 0;
 let accessCode = "";
 let answers = Array(40).fill(null);
 let pending = false;
-const attemptKey = "shuqba-scientific-english-retake";
+const attemptKey = "shuqba-scientific-english-retake-2026-11-18";
 function persist(){
   try{localStorage.setItem(attemptKey,JSON.stringify({attemptId,studentName,branchName,deadline,accessCode,answers,pending}));}catch{}
 }
@@ -788,7 +788,7 @@ async function finishExam(timeEnded){
       },
       body:JSON.stringify({
         action:"submit",
-        exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي",
+        exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي - الإعادة",
         student_name:studentName,
         branch:branchName,
         training_code:accessCode,
@@ -944,7 +944,7 @@ async function loadTeacherResults(){
         "Authorization":"Bearer "+session.access_token,
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({action:"list",exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي",branch:"علمي"})
+      body:JSON.stringify({action:"list",exam_subject:"اللغة الإنجليزية للصف الثاني عشر العلمي - الإعادة",branch:"علمي"})
     });
     const payload=await response.json();
     if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
